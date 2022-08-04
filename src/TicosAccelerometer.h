@@ -5,6 +5,7 @@
 
 class TicosAccelerometer: public TicosDevice {
     public:
+        virtual uint8_t getGyro(float* x, float* y, float* z);
         virtual uint8_t getAccel(uint16_t* xbuf, uint16_t* ybuf, uint16_t* zbuf, uint8_t buflen);
 };
 

@@ -7,6 +7,7 @@
 class SilanSc7a20: public TicosAccelerometer {
     public:
         SilanSc7a20(uint8_t bus, uint8_t sda, uint8_t scl, uint8_t addr, uint32_t freq): m_i2c(bus, sda, scl, addr, freq) {}
+        uint8_t getGyro(float* x, float* y, float* z) override;
         uint8_t getAccel(uint16_t* xbuf, uint16_t* ybuf, uint16_t* zbuf, uint8_t buflen) override;
     protected:
         bool open(void) override;

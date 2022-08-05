@@ -60,11 +60,11 @@
 
 // MECHANICAL CHARACTERISTICS
 // SENSITIVITY
-// X mg / (2 ** 11) = x mg/level or digit (2**11 --> 12 bit but signed so 11)
-#define _SO_2G  (( 2000) / (2 ** 11))  # ~1 mg / digit
-#define _SO_4G  (( 4000) / (2 ** 11))  # ~2 mg / digit
-#define _SO_8G  (( 8000) / (2 ** 11))  # ~4 mg / digit
-#define _SO_16G ((16000) / (2 ** 11))  # ~8 mg / digit
+// X mg / (0x1 << 11) = x mg/level or digit (0x1 << 11 --> 12 bit but signed so 11)
+#define _SO_2G  (( 2000.0) / (0x2 << 10))  // ~1 mg / digit
+#define _SO_4G  (( 4000.0) / (0x2 << 10))  // ~2 mg / digit
+#define _SO_8G  (( 8000.0) / (0x2 << 10))  // ~4 mg / digit
+#define _SO_16G ((16000.0) / (0x2 << 10))  // ~8 mg / digit
 
 #define _FS_2G  (0x88)
 #define _FS_4G  (0x98)
@@ -86,28 +86,18 @@ bool SilanSc7a20::open(void) {
     bool res = true;
     if (!m_inited) {
         uint8_t id = 0;
-        if ((res = m_i2c.open())) {
-            // 配置参数
-            res &= m_i2c.write(_CTRL1, 0x57);
-            res &= m_i2c.write(_CTRL2, 0x81);
-            res &= m_i2c.write(_CTRL3, 0x40);
-            res &= m_i2c.write(_CTRL4, _FS_2G);
-            res &= m_i2c.write(_CTRL5, 0x08);
-            res &= m_i2c.write(_CTRL6, 0x00);
-            //res &= m_i2c.write(0x20, 0x47); // 使能xyz轴，正常模式，50Hz
-            //res &= m_i2c.write(0x23, 0x18); // 连续更新，大端数据，4G量程
-            //res &= m_i2c.write(0x24, 0xC0); // 使能FIFO模式
-            //res &= m_i2c.write(0x2E, 0x4F); // FIFO 模式，阈值是F
-            // 校验reg值
-            //uint8_t data = 0;
-            //res &= m_i2c.read(0x20, &data);
-            //res &= m_i2c.read(0x23, &data);
-            //res &= m_i2c.read(0x24, &data);
-            //res &= m_i2c.read(0x2E, &data);
-            // 读取gsensor id （sc7a20 ID 是0x11）
+        if ((res &= m_i2c.open())) {
             res &= m_i2c.read(_CHIP_ID_ADDR, &id);
             logDebug("sc7a20: open, id = %x:%x", id, _CHIP_ID_VALUE);
-            m_inited = res;
+            if (id == _CHIP_ID_VALUE) {
+                res &= m_i2c.write(_CTRL1, 0x57);
+                res &= m_i2c.write(_CTRL2, 0x81);
+                res &= m_i2c.write(_CTRL3, 0x40);
+                res &= m_i2c.write(_CTRL4, _FS_2G);
+                res &= m_i2c.write(_CTRL5, 0x08);
+                res &= m_i2c.write(_CTRL6, 0x00);
+                m_inited = res;
+            }
         }
     }
     return res;
@@ -125,18 +115,20 @@ bool SilanSc7a20::close(void) {
     return res;
 }
 
-uint8_t SilanSc7a20::getGyro(float* x, float* y, float* z) {
+uint8_t SilanSc7a20::getAccel(float* x, float* y, float* z) {
     uint8_t buf[6] = {0};
-    double factor = _SO_2G * _SF_G;
-    if (m_i2c.read(_OUT_X_L, buf, sizeof(buf) / sizeof(buf[0]))) {
-        *x = (((uint16_t) ((buf[1] << 8) | buf[0])) >> 4) * factor;
-        *y = (((uint16_t) ((buf[3] << 8) | buf[2])) >> 4) * factor;
-        *z = (((uint16_t) ((buf[5] << 8) | buf[4])) >> 4) * factor;
-        logDebug("sc7a20: gyro = %f, %f, %f", *x, *y, *z);
-        return 1;
-    }
-    logErr("sc7a20: gyro read error");
-    return 0;
+    float factor = _SO_2G;
+//    m_i2c.read(_OUT_X_L, buf + 0);
+//    m_i2c.read(_OUT_X_H, buf + 1);
+//    m_i2c.read(_OUT_Y_L, buf + 2);
+//    m_i2c.read(_OUT_Y_H, buf + 3);
+//    m_i2c.read(_OUT_Z_L, buf + 4);
+//    m_i2c.read(_OUT_Z_H, buf + 5);
+    m_i2c.read(_OUT_X_L | 0x80, buf, 6);
+    *x = (int16_t)(((buf[1] << 8) | buf[0]) >> 4) * factor;
+    *y = (int16_t)(((buf[3] << 8) | buf[2]) >> 4) * factor;
+    *z = (int16_t)(((buf[5] << 8) | buf[4]) >> 4) * factor;
+    return 1;
 }
 
 uint8_t SilanSc7a20::getAccel(uint16_t* xbuf, uint16_t* ybuf, uint16_t* zbuf, uint8_t buflen) {

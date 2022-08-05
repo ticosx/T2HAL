@@ -9,4 +9,4 @@ class TicosAccelerometer: public TicosDevice {
         virtual uint8_t getAccel(uint16_t* xbuf, uint16_t* ybuf, uint16_t* zbuf, uint8_t buflen);
 };
 
-#endif // __TICOS_GSENSOR_H
+#endif // __TICOS_ACCELEROMETER_H

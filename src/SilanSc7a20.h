@@ -1,4 +1,4 @@
-#ifndef __TICOS_SC7A20_H
+#ifndef __SILAN_SC7A20_H
 #define __SILAN_SC7A20_H
 
 #include <TicosAccelerometer.h>

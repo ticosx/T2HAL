@@ -1,5 +1,5 @@
-#include "TicosNTCSensor.h"
-#include "Log.h"
+#include <TicosNTCSensor.h>
+#include <Log.h>
 
 #define TEMP_TABLE_LEN         121 //温度区间总值
 const static uint16_t s_temp_table[TEMP_TABLE_LEN] =
@@ -20,49 +20,31 @@ const static uint16_t s_temp_table[TEMP_TABLE_LEN] =
 
 bool TicosNTCSensor::open(void) {
     if (!m_inited) {
-        esp_err_t err;
-        // 12位分辨率
-        adc_bits_width_t bit_width = ADC_WIDTH_BIT_12;
-        if (ESP_OK != (err = adc1_config_width(bit_width))) {
-            logErr("adc1_config_width failed: %d", err);
-            return false;
-        }
-        // 电压输入衰减
-        adc_atten_t atten = ADC_ATTEN_DB_11;
-        if (ESP_OK != (err = adc1_config_channel_atten(m_chn, atten))) {
-            logErr("adc1_config_channel_atten failed: %d", err);
-            return false;
-        }
-        esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-                ADC_UNIT_1, atten, bit_width, m_vref, &m_adc_chars);
-        logDebug("esp_adc_cal_characterize: %d", val_type);
-        logDebug("ntc sensor startup: pin=%d, chn=%d, vref=%d",
-                m_pin, m_chn, m_vref);
-
-        m_inited = true;
+        m_inited = m_adc.open();
     }
     return true;
 }
 
 bool TicosNTCSensor::close(void) {
+    bool res = true;
     if (m_inited) {
-        gpio_reset_pin(m_pin);
-        logDebug("ntc sensor cleanup");
-        m_inited = false;
+        if ((res = m_adc.close())) {
+            m_inited = false;
+        }
     }
-    return true;
+    return res;
 }
 
 /*****************************************************************************
-*函数名   : getVolt
+*函数名   : voltage
 *函数功能 : 获取ADC转换电压值
 *输入参数 : 无
 *输出参数 : 无
 *返回值   : volt_average电压值
 *****************************************************************************/
-uint32_t TicosNTCSensor::getVolt(void) {
+uint32_t TicosNTCSensor::voltage(void) {
     uint8_t  queue_size = TICOS_ADC_NTC_QUEUE_SIZE;
-    uint8_t  i =0;
+    uint8_t  i = 0;
     uint32_t ret =0;
 
     uint32_t adc_max = 0;
@@ -74,7 +56,7 @@ uint32_t TicosNTCSensor::getVolt(void) {
     //TEMP ADC CHECK
     for(i = 0; i < queue_size; i++) //一次读取10个
     {
-        m_ntc_queue[i]= adc1_get_raw(m_chn); // 采集ADC原始值
+        m_ntc_queue[i]= m_adc.adc(); // 采集ADC原始值
     }  
 
     adc_max = m_ntc_queue[0];
@@ -94,25 +76,25 @@ uint32_t TicosNTCSensor::getVolt(void) {
     adc_sum += (queue_size - 2) / 2;
     adc_average = adc_sum / (queue_size - 2);
     //  Ref	= 3.3V
-    volt_average =  esp_adc_cal_raw_to_voltage(adc_average, &m_adc_chars); //根据电阻分压计算电压
+    volt_average = m_adc.voltage(adc_average); //根据电阻分压计算电压
 
-    return	volt_average;
+    return volt_average;
 }
 
 /*****************************************************************************
-*函数名   : getTemp
+*函数名   : temperature
 *函数功能 : 获取温度值
 *输入参数 : 无
 *输出参数 : 无
 *返回值   : i16temp  温度值
 *****************************************************************************/
-int16_t TicosNTCSensor::getTemp(void)
+int16_t TicosNTCSensor::temperature(void)
 {
     uint32_t volt_value = 0;
     uint16_t u16i = 0;
     int16_t  i16temp = 0;
 
-    volt_value = getVolt();
+    volt_value = voltage();
     for(u16i = 0; u16i < TEMP_TABLE_LEN; u16i++) { //查表
         if(volt_value >= s_temp_table[u16i]) {
             break;

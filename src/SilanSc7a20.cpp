@@ -1,5 +1,5 @@
-#include "SilanSc7a20.h"
-#include "Log.h"
+#include <SilanSc7a20.h>
+#include <Log.h>
 
 /**********sc7a20**********/
 #define IIC_ADDR        0x19
@@ -106,8 +106,7 @@ bool SilanSc7a20::open(void) {
 bool SilanSc7a20::close(void) {
     bool res = true;
     if (m_inited) {
-        res = m_i2c.close();
-        if (res) {
+        if ((res = m_i2c.close())) {
             m_inited = false;
             logDebug("sc7a20: close");
         }

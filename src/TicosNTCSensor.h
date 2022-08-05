@@ -4,18 +4,20 @@
 #include <TicosDevice.h>
 #include <TicosADC.h>
 
-#define TICOS_ADC_NTC_QUEUE_SIZE     10
-
 class TicosNTCSensor: public TicosDevice {
     public:
-        TicosNTCSensor(uint8_t pin, uint8_t chn, uint16_t vref): m_adc(pin, chn, vref) {}
+        TicosNTCSensor(uint8_t adcpin, uint8_t chn, uint16_t vref): m_adc(adcpin, chn, vref) {}
         bool open(void) override;
         bool close(void) override;
-        int16_t temperature(void);
-        uint32_t voltage(void);
+        uint32_t adc(void) {
+            return m_adc.adc();
+        }
+        uint32_t voltage(uint8_t nex=0) {
+            return m_adc.voltage(nex);
+        }
+        int16_t temperature(uint8_t nex=0);
     private:
         bool        m_inited;
-        uint32_t    m_ntc_queue[TICOS_ADC_NTC_QUEUE_SIZE];
         TicosADC    m_adc;
 };
 

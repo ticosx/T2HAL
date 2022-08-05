@@ -1,6 +1,7 @@
 #include <TicosNTCSensor.h>
 #include <Log.h>
 
+// TODO 需要添加接口配置
 #define TEMP_TABLE_LEN         121 //温度区间总值
 const static uint16_t s_temp_table[TEMP_TABLE_LEN] =
 {
@@ -36,71 +37,24 @@ bool TicosNTCSensor::close(void) {
 }
 
 /*****************************************************************************
-*函数名   : voltage
-*函数功能 : 获取ADC转换电压值
-*输入参数 : 无
-*输出参数 : 无
-*返回值   : volt_average电压值
-*****************************************************************************/
-uint32_t TicosNTCSensor::voltage(void) {
-    uint8_t  queue_size = TICOS_ADC_NTC_QUEUE_SIZE;
-    uint8_t  i = 0;
-    uint32_t ret =0;
-
-    uint32_t adc_max = 0;
-    uint32_t adc_min = 0;
-    uint32_t adc_sum = 0;
-    uint32_t adc_average = 0;
-    uint32_t volt_average = 0; //电压值
-
-    //TEMP ADC CHECK
-    for(i = 0; i < queue_size; i++) //一次读取10个
-    {
-        m_ntc_queue[i]= m_adc.adc(); // 采集ADC原始值
-    }  
-
-    adc_max = m_ntc_queue[0];
-    adc_min = m_ntc_queue[0];
-
-    for(i = 0; i < queue_size; i++)
-    {
-        if(adc_max < m_ntc_queue[i])
-            adc_max = m_ntc_queue[i];
-        if(adc_min > m_ntc_queue[i])
-            adc_min = m_ntc_queue[i];
-        adc_sum += m_ntc_queue[i];
-    }
-    adc_sum = adc_sum - adc_max - adc_min;
-
-    /*平均AD值*/
-    adc_sum += (queue_size - 2) / 2;
-    adc_average = adc_sum / (queue_size - 2);
-    //  Ref	= 3.3V
-    volt_average = m_adc.voltage(adc_average); //根据电阻分压计算电压
-
-    return volt_average;
-}
-
-/*****************************************************************************
 *函数名   : temperature
 *函数功能 : 获取温度值
-*输入参数 : 无
+*输入参数 : nex - 信号采集次数（不填写或填'0'将输入默认次数）
 *输出参数 : 无
-*返回值   : i16temp  温度值
+*返回值   : 温度值
 *****************************************************************************/
-int16_t TicosNTCSensor::temperature(void)
+int16_t TicosNTCSensor::temperature(uint8_t nex)
 {
     uint32_t volt_value = 0;
     uint16_t u16i = 0;
     int16_t  i16temp = 0;
 
-    volt_value = voltage();
+    volt_value = voltage(nex);
     for(u16i = 0; u16i < TEMP_TABLE_LEN; u16i++) { //查表
         if(volt_value >= s_temp_table[u16i]) {
             break;
         }
     }
-    i16temp = u16i - 10; //温度对应ADC电压表是从-10℃起
 
-    return i16temp;
+    return u16i - 10; //温度对应ADC电压表是从-10℃起
 }

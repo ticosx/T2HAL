@@ -5,6 +5,8 @@
 #include <driver/gpio.h>
 #include <esp_adc_cal.h>
 
+#define TICOS_DEFAULT_ADC_NEX     10
+
 class TicosADC {
     public:
         TicosADC(uint8_t pin, uint8_t chn, uint16_t vref) {
@@ -15,7 +17,7 @@ class TicosADC {
         bool open(void);
         bool close(void);
         uint32_t adc(void);
-        uint32_t voltage(uint32_t adc);
+        uint32_t voltage(uint8_t nex=TICOS_DEFAULT_ADC_NEX);
     private:
         bool            m_inited;
         gpio_num_t      m_pin;

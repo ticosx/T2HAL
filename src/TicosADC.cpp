@@ -52,7 +52,7 @@ uint32_t TicosADC::voltage(uint8_t nex) {
     uint32_t adc_sum = 0;
     uint32_t adc_average = 0;
     uint32_t volt_average = 0; // 电压值
-    uint8_t  queue_size = nex ? nex : TICOS_DEFAULT_ADC_NEX;
+    uint8_t  queue_size = nex ? nex : TICOS_HAL_DEFAULT_NEX;
     uint32_t queue[queue_size];
 
     for(i = 0; i < queue_size; i++) {

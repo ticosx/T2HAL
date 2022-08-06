@@ -6,7 +6,7 @@
 
 class TicosBattery: public TicosDevice {
     public:
-        TicosBattery(uint8_t detpin, uint8_t adcpin, uint8_t chn, uint16_t vref): m_det(gpio_num_t(detpin)), m_adc(adcpin, chn, vref) {}
+        TicosBattery(uint8_t det, uint8_t adc, uint8_t chn, uint16_t vref): m_det(gpio_num_t(det)), m_adc(adc, chn, vref) {}
         bool open(void) override;
         bool close(void) override;
         /*!
@@ -14,13 +14,13 @@ class TicosBattery: public TicosDevice {
         *    @param  nex - 信号采集次数（不填写或填'0'将输入默认次数）
         *    @return 初始化成功则返回电量值，单位是%（0-100%）
         */
-        uint8_t capacity(uint8_t nex=0);
+        uint8_t capacity(uint8_t nex=TICOS_HAL_DEFAULT_NEX);
         /*!
         *    @brief  获取电池电压值
         *    @param  nex - 信号采集次数（不填写或填'0'将输入默认次数）
         *    @return 初始化成功则返回电压值，单位是mV
         */
-        uint32_t voltage(uint8_t nex=0) {
+        uint32_t voltage(uint8_t nex=TICOS_HAL_DEFAULT_NEX) {
             return m_adc.voltage(nex);
         }
         /*!

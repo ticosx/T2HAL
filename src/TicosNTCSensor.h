@@ -12,10 +12,10 @@ class TicosNTCSensor: public TicosDevice {
         uint32_t adc(void) {
             return m_adc.adc();
         }
-        uint32_t voltage(uint8_t nex=0) {
+        uint32_t voltage(uint8_t nex=TICOS_HAL_DEFAULT_NEX) {
             return m_adc.voltage(nex);
         }
-        int16_t temperature(uint8_t nex=0);
+        int16_t temperature(uint8_t nex=TICOS_HAL_DEFAULT_NEX);
     private:
         bool        m_inited;
         TicosADC    m_adc;

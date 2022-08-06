@@ -1,7 +1,7 @@
 #ifndef __TICOS_DEVICE_H
 #define __TICOS_DEVICE_H
 
-#include <Arduino.h>
+#include <TicosHAL.h>
 
 class TicosDevice {
     public:

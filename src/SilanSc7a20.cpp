@@ -82,6 +82,13 @@ enum PowerMode {
     POWER_MODE_LOW,
 };
 
+enum GRange {
+    GRANGE_2G   = 2,
+    GRANGE_4G   = 4,
+    GRANGE_8G   = 8,
+    GRANGE_16G  = 16,
+};
+
 bool SilanSc7a20::open(void) {
     bool res = true;
     if (!m_inited) {
@@ -114,19 +121,25 @@ bool SilanSc7a20::close(void) {
     return res;
 }
 
+static float sb2accel(uint8_t msb, uint8_t lsb, uint8_t range) {
+    int16_t temp = (((msb << 8) | lsb) >> 4) & 0xFFF;
+    if (temp & 0x0800) { // 需要计算补码
+        temp &= 0x07FF;
+        temp = ~temp;
+        temp = temp + 1;
+        temp &= 0x07FF;
+        temp = -temp;
+    }
+    return temp * range * 1000.0 / 2048;
+}
+
 uint8_t SilanSc7a20::getAccel(float* x, float* y, float* z) {
     uint8_t buf[6] = {0};
-    float factor = _SO_2G;
-//    m_i2c.read(_OUT_X_L, buf + 0);
-//    m_i2c.read(_OUT_X_H, buf + 1);
-//    m_i2c.read(_OUT_Y_L, buf + 2);
-//    m_i2c.read(_OUT_Y_H, buf + 3);
-//    m_i2c.read(_OUT_Z_L, buf + 4);
-//    m_i2c.read(_OUT_Z_H, buf + 5);
+    uint8_t range = GRANGE_2G;
     m_i2c.read(_OUT_X_L | 0x80, buf, 6);
-    *x = (int16_t)(((buf[1] << 8) | buf[0]) >> 4) * factor;
-    *y = (int16_t)(((buf[3] << 8) | buf[2]) >> 4) * factor;
-    *z = (int16_t)(((buf[5] << 8) | buf[4]) >> 4) * factor;
+    *x = sb2accel(buf[1], buf[0], range);
+    *y = sb2accel(buf[3], buf[2], range);
+    *z = sb2accel(buf[5], buf[4], range);
     return 1;
 }
 

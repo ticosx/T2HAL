@@ -21,14 +21,13 @@ bool WS2812RMT::close(void) {
 void WS2812RMT::send(uint16_t i, TicosPixel888* pixel) {
     // Neopixel wants colors in green then red then blue order
     m_strip->set_pixel(m_strip, i, pixel->r, pixel->g, pixel->b);
-    m_strip->refresh(m_strip, 100);
     // Wait long enough without sending any bots to cause the pixels to latch
-    delayMicroseconds(30);
+    // delayMicroseconds(50);
 }
 
-void WS2812RMT::show(void) {
-    // Just wait long enough without sending any bots to cause the pixels to latch and display the last sent frame
-   // _delay_us((RES / 1000UL) + 1); // Round up since the delay must be _at_least_ this long (too short might not work, too long not a problem)
+void WS2812RMT::refresh(void) {
+    // Wait long enough without sending any bots to cause the pixels to latch
+    m_strip->refresh(m_strip, 100);
 }
 
 void WS2812RMT::fill(uint8_t r, uint8_t g, uint8_t b) {
@@ -52,8 +51,8 @@ void WS2812RMT::fill(TicosPixel888* pixel, uint16_t count, bool tail) {
     for (uint16_t i = skip; i < (skip + count); i++) {
         send(i, pixel);
     }
+    refresh();
     sei();
-    show();
 }
 
 void WS2812RMT::pattern(TicosPixel888* pixels, uint16_t len) {
@@ -69,6 +68,6 @@ void WS2812RMT::pattern(TicosPixel888* pixels, uint16_t len) {
     for (; i < m_nums; ++i) {
         send(i, &black);
     }
+    refresh();
     sei();
-    show();
 }

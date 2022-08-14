@@ -30,6 +30,10 @@ void WS2812RMT::refresh(void) {
     m_strip->refresh(m_strip, 100);
 }
 
+void WS2812RMT::clear(void) {
+    m_strip->clear(m_strip, 50);
+}
+
 void WS2812RMT::fill(uint8_t r, uint8_t g, uint8_t b) {
     TicosPixel888 pixel = { r, g, b };
     fill(&pixel);

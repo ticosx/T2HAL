@@ -66,11 +66,6 @@
 #define _SO_8G  (( 8000.0) / (0x2 << 10))  // ~4 mg / digit
 #define _SO_16G ((16000.0) / (0x2 << 10))  // ~8 mg / digit
 
-#define _FS_2G  (0x88)
-#define _FS_4G  (0x98)
-#define _FS_8G  (0xA8)
-#define _FS_16G (0xB8)
-
 // ACCEL UNIT
 #define _SF_G    0.001  // 1 mg = 0.001 g
 #define _SF_SI   0.00980665  // 1 mg = 0.00980665 m/s2
@@ -97,12 +92,15 @@ bool SilanSc7a20::open(void) {
             res &= m_i2c.read(_CHIP_ID_ADDR, &id);
             logDebug("sc7a20: open, id = %x:%x", id, _CHIP_ID_VALUE);
             if (id == _CHIP_ID_VALUE) {
-                res &= m_i2c.write(_CTRL1, 0x57);
-                res &= m_i2c.write(_CTRL2, 0x81);
-                res &= m_i2c.write(_CTRL3, 0x40);
-                res &= m_i2c.write(_CTRL4, _FS_2G);
-                res &= m_i2c.write(_CTRL5, 0x08);
+                res &= m_i2c.write(_CTRL1, 0x4F);   // 50Hz，低功耗，使能x, y, z轴
+                res &= m_i2c.write(_CTRL2, 0xC1);   // 中断事件自动复位，配置AOI1高通滤波
+                res &= m_i2c.write(_CTRL3, 0x40);   // 在INT1 上 使能 AOI1 中断
+                res &= m_i2c.write(_CTRL4, 0x98);   // +/-4G量程，高精度使能
+                res &= m_i2c.write(_CTRL5, 0x88);   // 在INT1 上配置重载修调值, 锁存中断配置寄存器上指定的中断响应
                 res &= m_i2c.write(_CTRL6, 0x00);
+                res &= m_i2c.write(_INT1_CFG, 0x3F);// 在INT1 上配置3轴高低事件或者方向检测中断使能
+                res &= m_i2c.write(_INT1_THS, 0x64);// 在INT1 上配置中断阈值为100
+                res &= m_i2c.write(_INT1_DUR, 0x88);// 在INT1 上配置中断事件最小持续时间为8 单位步进/以ODR为时钟
                 m_inited = res;
             }
         }
@@ -135,7 +133,7 @@ static float sb2accel(uint8_t msb, uint8_t lsb, uint8_t range) {
 
 uint8_t SilanSc7a20::getAccel(float* x, float* y, float* z) {
     uint8_t buf[6] = {0};
-    uint8_t range = GRANGE_2G;
+    uint8_t range = GRANGE_4G;
     m_i2c.read(_OUT_X_L | 0x80, buf, 6);
     *x = sb2accel(buf[1], buf[0], range);
     *y = sb2accel(buf[3], buf[2], range);

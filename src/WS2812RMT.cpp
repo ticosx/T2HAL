@@ -18,7 +18,7 @@ bool WS2812RMT::close(void) {
     return m_strip == NULL;
 }
 
-void WS2812RMT::send(uint16_t i, TicosPixel888* pixel) {
+void WS2812RMT::send(uint16_t i, TicosRGB888* pixel) {
     // Neopixel wants colors in green then red then blue order
     m_strip->set_pixel(m_strip, i, pixel->r, pixel->g, pixel->b);
     // Wait long enough without sending any bots to cause the pixels to latch
@@ -35,12 +35,12 @@ void WS2812RMT::clear(void) {
 }
 
 void WS2812RMT::fill(uint8_t r, uint8_t g, uint8_t b) {
-    TicosPixel888 pixel = { r, g, b };
+    TicosRGB888 pixel = { r, g, b };
     fill(&pixel);
 }
 
-void WS2812RMT::fill(TicosPixel888* pixel, uint16_t count, bool tail) {
-    TicosPixel888 black = { 0, 0, 0 };
+void WS2812RMT::fill(TicosRGB888* pixel, uint16_t count, bool tail) {
+    TicosRGB888 black = { 0, 0, 0 };
     if (count == 0 || count > m_nums) {
         count = m_nums;
     }
@@ -59,9 +59,9 @@ void WS2812RMT::fill(TicosPixel888* pixel, uint16_t count, bool tail) {
     sei();
 }
 
-void WS2812RMT::pattern(TicosPixel888* pixels, uint16_t len) {
+void WS2812RMT::pattern(TicosRGB888* pixels, uint16_t len) {
     uint16_t i= 0;
-    TicosPixel888 black = { 0, 0, 0 };
+    TicosRGB888 black = { 0, 0, 0 };
     if (len > m_nums) {
         len = m_nums;
     }

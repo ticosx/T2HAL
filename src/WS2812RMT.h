@@ -15,10 +15,10 @@ class WS2812RMT: public TicosLedStrip {
         bool close(void) override;
         void clear(void);
         void fill(uint8_t r, uint8_t g, uint8_t b) override;
-        void fill(TicosPixel888* pixel, uint16_t count=0, bool tail=false) override;
-        void pattern(TicosPixel888* pixels, uint16_t len) override;
+        void fill(TicosRGB888* pixel, uint16_t count=0, bool tail=false) override;
+        void pattern(TicosRGB888* pixels, uint16_t len) override;
     private:
-        void send(uint16_t i, TicosPixel888* pixel);
+        void send(uint16_t i, TicosRGB888* pixel);
         void refresh(void);
         uint8_t     m_pin;
         uint8_t     m_chn;

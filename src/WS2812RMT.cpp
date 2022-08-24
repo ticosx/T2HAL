@@ -6,7 +6,7 @@
 
 bool WS2812RMT::open(void) {
     if (!m_strip) {
-        m_strip = led_strip_init(m_chn, m_pin, m_nums);
+        m_strip = led_strip_init(m_chn, m_pin, nums());
     }
     return m_strip != NULL;
 }
@@ -41,35 +41,46 @@ void WS2812RMT::fill(uint8_t r, uint8_t g, uint8_t b) {
 
 void WS2812RMT::fill(TicosRGB888* pixel, uint16_t count, bool tail) {
     TicosRGB888 black = { 0, 0, 0 };
-    if (count == 0 || count > m_nums) {
-        count = m_nums;
+    const uint8_t n = nums();
+    if (count == 0 || count > n) {
+        count = n;
     }
-    // If tail is true
-    // Skip pixels by filling them with black color
-    uint16_t skip = tail ? m_nums - count : 0;
+    uint16_t curr, end, step, skip;
+    if (tail) {
+        curr = n - 1;
+        skip = n - 1 - count;
+        end = -1;
+        step = -1;
+    } else {
+        curr = 0;
+        skip = count;
+        end = n;
+        step = 1;
+    }
     cli();
-    for (uint16_t i = 0; i < skip && i < m_nums; i++) {
-        send(i, &black);
+    for (; curr != skip; curr+=step) {
+        send(curr, pixel);
     }
     // Fill pixels
-    for (uint16_t i = skip; i < (skip + count); i++) {
-        send(i, pixel);
+    for (; curr != end; curr+=step) {
+        send(curr, &black);
     }
     refresh();
     sei();
 }
 
 void WS2812RMT::pattern(TicosRGB888* pixels, uint16_t len) {
-    uint16_t i= 0;
+    uint16_t i = 0;
+    const uint8_t n = nums();
     TicosRGB888 black = { 0, 0, 0 };
-    if (len > m_nums) {
-        len = m_nums;
+    if (len > n) {
+        len = n;
     }
     cli();
     for (; i < len; ++i) {
         send(i, pixels + i);
     }
-    for (; i < m_nums; ++i) {
+    for (; i < n; ++i) {
         send(i, &black);
     }
     refresh();

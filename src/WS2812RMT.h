@@ -6,10 +6,9 @@
 
 class WS2812RMT: public TicosLedStrip {
     public:
-        WS2812RMT(uint8_t pin, uint8_t chn, uint16_t n) {
+        WS2812RMT(uint8_t pin, uint8_t chn, uint16_t n): TicosLedStrip(n) {
             m_pin = pin;
             m_chn = chn;
-            m_nums = n;
         }
         bool open(void) override;
         bool close(void) override;
@@ -22,7 +21,6 @@ class WS2812RMT: public TicosLedStrip {
         void refresh(void);
         uint8_t     m_pin;
         uint8_t     m_chn;
-        uint16_t    m_nums;
         led_ws2812_strip_t* m_strip;
 };
 

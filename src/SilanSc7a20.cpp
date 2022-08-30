@@ -93,14 +93,14 @@ bool SilanSc7a20::open(void) {
             logDebug("sc7a20: open, id = %x:%x", id, _CHIP_ID_VALUE);
             if (id == _CHIP_ID_VALUE) {
                 res &= m_i2c.write(_CTRL1, 0x4F);   // 50Hz，低功耗，使能x, y, z轴
-                res &= m_i2c.write(_CTRL2, 0xC1);   // 中断事件自动复位，配置AOI1高通滤波
+                res &= m_i2c.write(_CTRL2, 0x81);   // 中断事件自动复位，配置AOI1高通滤波
                 res &= m_i2c.write(_CTRL3, 0x40);   // 在INT1 上 使能 AOI1 中断
                 res &= m_i2c.write(_CTRL4, 0x98);   // +/-4G量程，高精度使能
                 res &= m_i2c.write(_CTRL5, 0x88);   // 在INT1 上配置重载修调值, 锁存中断配置寄存器上指定的中断响应
                 res &= m_i2c.write(_CTRL6, 0x00);
-                res &= m_i2c.write(_INT1_CFG, 0x3F);// 在INT1 上配置3轴高低事件或者方向检测中断使能
-                res &= m_i2c.write(_INT1_THS, 0x64);// 在INT1 上配置中断阈值为100
-                res &= m_i2c.write(_INT1_DUR, 0x88);// 在INT1 上配置中断事件最小持续时间为8 单位步进/以ODR为时钟
+                res &= m_i2c.write(_INT1_CFG, 0x7F);// 在INT1 上配置3轴高低事件或者6D方向运动识别使能
+                res &= m_i2c.write(_INT1_THS, 0x03);// 在INT1 上配置中断阈值为3
+                res &= m_i2c.write(_INT1_DUR, 0x03);// 在INT1 上配置中断事件最小持续时间为8 单位步进/以ODR为时钟
                 m_inited = res;
             }
         }

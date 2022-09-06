@@ -41,7 +41,7 @@ void WS2812RMT::fill(uint8_t r, uint8_t g, uint8_t b) {
 
 void WS2812RMT::fill(TicosRGB888* pixel, uint16_t count, bool tail) {
     TicosRGB888 black = { 0, 0, 0 };
-    const uint8_t n = nums();
+    const uint16_t n = nums();
     if (count == 0 || count > n) {
         count = n;
     }
@@ -71,7 +71,7 @@ void WS2812RMT::fill(TicosRGB888* pixel, uint16_t count, bool tail) {
 
 void WS2812RMT::pattern(TicosRGB888* pixels, uint16_t len) {
     uint16_t i = 0;
-    const uint8_t n = nums();
+    const uint16_t n = nums();
     TicosRGB888 black = { 0, 0, 0 };
     if (len > n) {
         len = n;

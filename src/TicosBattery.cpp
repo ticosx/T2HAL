@@ -84,4 +84,3 @@ uint8_t TicosBattery::capacity(uint8_t nex) {
     }
     return 0;
 }
-

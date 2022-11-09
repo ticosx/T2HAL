@@ -1,5 +1,6 @@
 #include <AviaHx711.h>
 #include <Log.h>
+#include <driver/gpio.h>
 
 #define POWER_ON    0
 #define POWER_OFF   1
@@ -9,10 +10,11 @@
 bool AviaHx711::open(void) {
     bool res = true;
     if (!m_inited) {
+        digitalWrite(m_pw,  POWER_ON);
         pinMode(m_sck,    OUTPUT);
         pinMode(m_dout,     INPUT_PULLUP);
         pinMode(m_pw,       OUTPUT);
-        digitalWrite(m_pw,  POWER_ON);
+       
         res = true;
         logDebug("hx711: open pw=%d, sck=%d, dout=%d, gain=%d", m_pw, m_sck, m_dout, m_gain);
     }
@@ -23,6 +25,8 @@ bool AviaHx711::open(void) {
 bool AviaHx711::close(void) {
     bool res = true;
     if (m_inited) {
+        gpio_reset_pin((gpio_num_t)m_sck);
+        gpio_reset_pin((gpio_num_t)m_dout);
         digitalWrite(m_pw,  POWER_OFF);
         m_inited = false;
         logDebug("hx711: close");

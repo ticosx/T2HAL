@@ -11,6 +11,7 @@ class TicosDataStorage: public TicosDevice {
        // virtual uint32_t save(uint8_t nex=TICOS_HAL_DEFAULT_NEX);
         virtual size_t readfile(const char* path,uint8_t *data,size_t offset,size_t len);
         virtual size_t writefile(size_t filesize,const char* path,uint8_t *data,size_t len);
+        virtual size_t writedata(size_t offset,const char* path,uint8_t *data,size_t len);
         virtual size_t appendfile(const char* path,uint8_t *data,size_t len);
         virtual size_t sizefile(const char *path);
         virtual bool renamefile(const char* pathFrom, const char* pathTo);

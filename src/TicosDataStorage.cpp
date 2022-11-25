@@ -84,6 +84,28 @@ size_t TicosDataStorage::writefile(size_t filesize,const char* path,uint8_t *dat
     return len ;
 }
 
+size_t TicosDataStorage::writedata(size_t offset,const char* path,uint8_t *data,size_t len) 
+{
+    size_t cursor;
+    size_t wr_len;
+
+    if(!len){
+        return  0;
+    }
+    File file = SPIFFS.open(path,FILE_WRITE);
+    if (!file) {
+       // raiseError(ctx); // Can't open file
+        return 0;
+    }
+    cursor = offset;
+    file.seek(cursor);
+    logInfo("cursor : %d\n",cursor);
+    file.write(data,len);
+    file.flush();
+    file.close();
+    return len ;
+}
+
 size_t TicosDataStorage::appendfile(const char* path,uint8_t *data,size_t len) 
 {
     size_t file_size;
